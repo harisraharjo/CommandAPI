@@ -15,14 +15,6 @@ namespace CommandAPI.Controllers
         private readonly ICommandAPIRepo _repository;
         public CommandsController(ICommandAPIRepo repository) => _repository = repository;
 
-        public ICommandAPIRepo Repository => _repository;
-
-        [HttpGet]
-        public ActionResult<IEnumerable<Command>> GetCommands()
-        {
-            var commands = _repository.GetCommands();
-            return Ok(commands);
-        }
 
         [HttpGet("{id}")]
         public ActionResult<Command> GetCommand(int id)
@@ -31,6 +23,13 @@ namespace CommandAPI.Controllers
             if (command is null) return NotFound();
 
             return Ok(command);
+        }
+
+        [HttpGet]
+        public ActionResult<IEnumerable<Command>> GetCommands()
+        {
+            var commands = _repository.GetCommands();
+            return Ok(commands);
         }
     }
 }
