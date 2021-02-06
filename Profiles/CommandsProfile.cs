@@ -13,6 +13,7 @@ namespace CommandAPI.Profiles
         public CommandsProfile()
         {
             CreateMap<Command, CommandGetDTO>();
+            CreateMap<CommandCreateDTO, Command>();
         }
     }
 }

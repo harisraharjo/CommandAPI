@@ -24,7 +24,7 @@ namespace CommandAPI.Controllers
         }
 
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name ="GetCommand")]
         public ActionResult<CommandGetDTO> GetCommand(int id)
         {
             var command = _repository.GetCommand(id);
@@ -40,6 +40,17 @@ namespace CommandAPI.Controllers
             var commands = _repository.GetCommands();
             var result = _mapper.Map<IEnumerable<CommandGetDTO>>(commands);
             return Ok(result);
+        }
+
+        [HttpPost]
+        public ActionResult<CommandGetDTO> CreateCommand(CommandCreateDTO commandCreateDTO)
+        {
+            var command = _mapper.Map<Command>(commandCreateDTO);
+            _repository.Create(command);
+            _repository.SaveChanges();
+
+            var result = _mapper.Map<CommandGetDTO>(command);
+            return CreatedAtRoute(nameof(GetCommand),new { Id=result.Id }, result);
         }
     }
 }

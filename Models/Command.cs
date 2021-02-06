@@ -6,22 +6,13 @@ using System.Threading.Tasks;
 
 namespace CommandAPI.Models
 {
-    public class Command
+    public class Command : CommandBase, IModel
     {
         [Key]
         [Required]
         public int Id { get; init; }
 
-        [Required]
-        [MaxLength(250)]
-        public string Usability { get; set; }
-
-        [Required]
-        public string CommandLine { get; set; }
-
-        public int PlatformId { get; set; }
-
         public Platform Platform { get; set; }
-
+        
     }
 }
