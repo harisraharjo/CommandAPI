@@ -3,11 +3,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,12 +30,19 @@ namespace CommandAPI
         public void ConfigureServices(IServiceCollection services)
         {
 
+            var builder = new NpgsqlConnectionStringBuilder() { 
+                ConnectionString = Configuration.GetConnectionString("PostgreSqlConnection"),
+                Username = Configuration["UserID"], 
+                Password = Configuration["Password"] };
+
+            services.AddDbContext<CommandContext>(opt => opt.UseNpgsql(builder.ConnectionString));
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "CommandAPI", Version = "v1" });
             });
-            services.AddScoped<ICommandAPIRepo, MockCommandAPIRepo>();
+            services.AddScoped<ICommandAPIRepo, SqlCommandAPIRepo>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
