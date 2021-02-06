@@ -14,6 +14,7 @@ namespace CommandAPI.Profiles
         {
             CreateMap<Command, CommandGetDTO>();
             CreateMap<CommandCreateDTO, Command>();
+            CreateMap<Command, CommandCreateDTO>();
         }
     }
 }

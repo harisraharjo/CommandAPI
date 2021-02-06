@@ -12,7 +12,6 @@ namespace CommandAPI.Models
         [Required]
         public int Id { get; init; }
 
-        public Platform Platform { get; set; }
-        
+        protected Platform Platform { get; }
     }
 }

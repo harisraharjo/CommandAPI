@@ -7,6 +7,7 @@ using CommandAPI.Data;
 using CommandAPI.Models;
 using AutoMapper;
 using CommandAPI.DTOs;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace CommandAPI.Controllers
 {
@@ -24,7 +25,7 @@ namespace CommandAPI.Controllers
         }
 
 
-        [HttpGet("{id}", Name ="GetCommand")]
+        [HttpGet("{id}", Name = "GetCommand")]
         public ActionResult<CommandGetDTO> GetCommand(int id)
         {
             var command = _repository.GetCommand(id);
@@ -50,7 +51,50 @@ namespace CommandAPI.Controllers
             _repository.SaveChanges();
 
             var result = _mapper.Map<CommandGetDTO>(command);
-            return CreatedAtRoute(nameof(GetCommand),new { Id=result.Id }, result);
+            return CreatedAtRoute(nameof(GetCommand), new { result.Id }, result);
         }
+
+        [HttpPut("{id}")]
+        public ActionResult UpdateCommand(int id, [FromBody] CommandCreateDTO commandUpdateDTO)
+        {
+            var command = _repository.GetCommand(id);
+            if (command is null) return NotFound();
+
+            _mapper.Map(commandUpdateDTO, command);
+            _repository.SaveChanges();
+
+            return NoContent();
+        }
+
+        [HttpPatch("{id}")]
+        public ActionResult PartialCommandUpdate(int id, [FromBody] JsonPatchDocument<CommandCreateDTO> patchDoc)
+        {
+            var command = _repository.GetCommand(id);
+            if (command is null) return NotFound();
+
+            var commandToPatch = _mapper.Map<CommandCreateDTO>(command);
+            patchDoc.ApplyTo(commandToPatch, ModelState);
+
+            if (!TryValidateModel(commandToPatch))
+            {
+                return ValidationProblem(ModelState);
+            }
+
+            _mapper.Map(commandToPatch, command);
+            _repository.SaveChanges();
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public ActionResult DeleteCommand(int id)
+        {
+            var command = _repository.GetCommand(id);
+            if (command is null) return NotFound();
+
+            _repository.Delete(command);
+            _repository.SaveChanges();
+            return NoContent();
+        }
+
     }
 }

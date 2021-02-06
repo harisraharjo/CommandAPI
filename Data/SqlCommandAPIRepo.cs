@@ -21,9 +21,11 @@ namespace CommandAPI.Data
             _context.Commands.Add(cmd);
         }
 
-        public void Delete()
+        public void Delete(Command cmd)
         {
-            throw new NotImplementedException();
+            if (cmd is null) throw new ArgumentNullException(nameof(cmd));
+
+            _context.Commands.Remove(cmd);
         }
 
         public Command GetCommand(int id)
