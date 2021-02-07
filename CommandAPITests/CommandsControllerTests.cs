@@ -1,14 +1,15 @@
-using CommandAPI.Data;
-using Moq;
 using AutoMapper;
-using System;
-using Xunit;
-using System.Collections.Generic;
-using CommandAPI.Models;
 using CommandAPI.Controllers;
-using CommandAPI.Profiles;
+using CommandAPI.Data;
 using CommandAPI.DTOs;
+using CommandAPI.Models;
+using CommandAPI.Profiles;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
+using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using Xunit;
 
 namespace CommandAPITests
 {
@@ -27,38 +28,6 @@ namespace CommandAPITests
             mapper = new Mapper(config);
         }
 
-        [Fact]
-        public void GetCommands_Returns200OK_IfDBIsEmpty()
-        {
-            VerifyType<OkObjectResult>(0);
-        }
-
-        [Fact]
-        public void GetCommands_Returns200OK_IfDBHasOneResource()
-        {
-            VerifyType<OkObjectResult>(1);
-        }
-
-        [Fact]
-        public void GetCommands_RetursCorrectType_IfDBHasOneResource()
-        {
-            VerifyType<ActionResult<IEnumerable<CommandGetDTO>>>(1, true);
-        }
-
-        [Fact]
-        public void GetCommands_ReturnsOneItem_IfDBHasOneResource()
-        {
-            var result = Arrange(1);
-
-            #region Assert
-            var okResult = result.Result as OkObjectResult;
-            Console.WriteLine($"HEI: {okResult.Value}");
-            var commands = okResult.Value as List<CommandGetDTO>;
-
-            Assert.Single(commands);
-            #endregion
-        }
-
         public void Dispose()
         {
             mockRepo = null;
@@ -67,25 +36,183 @@ namespace CommandAPITests
             mapper = null;
         }
 
-        private void VerifyType<T>(int num, bool enumeration=false) where T: class
+        #region Tests
+        #region GetCommands
+        [Fact]
+        public void GetCommands_Returns200OK_WhenDBIsEmpty()
         {
-            var arrange = Arrange(num);
-            if (enumeration)
-            {
-                Assert.IsType<T>(arrange);
-                return;
-            }
-
-            Assert.IsType<T>(arrange.Result);
+            var result = GetCommands(0);
+            Assert.IsType<OkObjectResult>(result.Result);
         }
 
-        private ActionResult<IEnumerable<CommandGetDTO>> Arrange(int num)
+        [Fact]
+        public void GetCommands_Returns200OK_WhenDBHasOneResource()
         {
-            mockRepo.Setup(repo => repo.GetCommands()).Returns(GetListOfCommand(num));
-            var controller = new CommandsController(mockRepo.Object, mapper);
+            var result = GetCommands(1);
+            Assert.IsType<OkObjectResult>(result.Result);
+        }
+
+        [Fact]
+        public void GetCommands_RetursCorrectType_WhenDBHasOneResource()
+        {
+            var result = GetCommands(1);
+            Assert.IsType<ActionResult<IEnumerable<CommandGetDTO>>>(result);
+        }
+
+        [Fact]
+        public void GetCommands_ReturnsOneItem_WhenDBHasOneResource()
+        {
+            var result = GetCommands(1);
+            var okResult = result.Result as OkObjectResult;
+            var commands = okResult.Value as List<CommandGetDTO>;
+
+            Assert.Single(commands);
+        }
+        #endregion
+
+        #region GetCommand
+        [Fact]
+        public void GetCommand_Returns200OK__WhenValidIDProvided()
+        {
+            var controller = ArrangeController(repo => repo.GetCommand(1), () => new Command
+            {
+                Id = 1,
+                Usability = "mock",
+                PlatformId = 1,
+                CommandLine = "Mock"
+            });
+            var result = controller.GetCommand(1);
+
+            Assert.IsType<OkObjectResult>(result.Result);
+        }
+
+        [Fact]
+        public void GetCommand_ReturnsCorrectType__WhenValidIDProvided()
+        {
+            var controller = ArrangeController(repo => repo.GetCommand(1), () => new Command
+            {
+                Id = 1,
+                Usability = "mock",
+                PlatformId = 1,
+                CommandLine = "Mock"
+            });
+            var result = controller.GetCommand(1);
+
+            Assert.IsType<ActionResult<CommandGetDTO>>(result);
+        }
+
+        [Fact]
+        public void GetCommand_Returns404NotFound_WhenNonExistentIDProvided()
+        {
+            var controller = ArrangeController<Command, Command>(repo => repo.GetCommand(0), () => null);
+            var result = controller.GetCommand(1);
+
+            Assert.IsType<NotFoundResult>(result.Result);
+        }
+        #endregion
+
+        #region CreateCommand
+        [Fact]
+        public void CreateCommand_ReturnsCorrectResourceType_WhenValidObjectSubmitted()
+        {
+            var controller = ArrangeController(repo => repo.GetCommand(1), () => new Command
+            {
+                Id = 1,
+                Usability = "mock",
+                PlatformId = 1,
+                CommandLine = "Mock"
+            });
+            var result = controller.CreateCommand(new());
+
+            Assert.IsType<ActionResult<CommandGetDTO>>(result);
+        }
+        [Fact]
+        public void CreateCommand_Returns201Created_WhenValidObjectSubmitted()
+        {
+            var controller = ArrangeController(repo => repo.GetCommand(1), () => new Command
+            {
+                Id = 1,
+                Usability = "mock",
+                PlatformId = 1,
+                CommandLine = "Mock"
+            });
+            var result = controller.CreateCommand(new());
+
+            Assert.IsType<CreatedAtRouteResult>(result.Result);
+        }
+        #endregion
+
+        #region UpdateCommand
+        [Fact]
+        public void UpdateCommand_Returns204NoContent_WhenValidObjectSubmitted()
+        {
+            var controller = ArrangeController(repo => repo.GetCommand(1), () => new Command
+            {
+                Id = 1,
+                Usability = "mock",
+                PlatformId = 1,
+                CommandLine = "Mock"
+            });
+            var result = controller.UpdateCommand(1, new());
+
+            Assert.IsType<NoContentResult>(result);
+        }
+
+        [Fact]
+        public void UpdateCommand_Returns404NotFound_WhenNonExistentResourceIDSubmitted()
+        {
+            var controller = ArrangeController<Command, Command>(repo => repo.GetCommand(0), () => null);
+            var result = controller.UpdateCommand(0, new());
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+        #endregion
+
+        #region PartialUpdateCommand / PatchCommand
+        [Fact]
+        public void PartialCommandUpdate_Returns404NotFound_WhenNonExistentResourceIDSubmitted()
+        {
+            var controller = ArrangeController<Command, Command>(repo => repo.GetCommand(0), () => null);
+            var result = controller.PartialCommandUpdate(0, new());
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+        #endregion
+
+        #region DeleteCommand
+        [Fact]
+        public void DeleteCommand_Returns204NoContent_WhenValidResourceIDSubmitted()
+        {
+            var controller = ArrangeController(repo => repo.GetCommand(1), () => new Command
+            {
+                Id = 1,
+                Usability = "mock",
+                PlatformId = 1,
+                CommandLine = "Mock"
+            });
+            var result = controller.DeleteCommand(1);
+
+            Assert.IsType<NoContentResult>(result);
+        }
+
+        [Fact]
+        public void DeleteCommand_Returns_404NotFound_WhenNonExistentResourceIDSubmitted()
+        {
+            var controller = ArrangeController<Command, Command>(repo => repo.GetCommand(1), () => null);
+            var result = controller.DeleteCommand(0);
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+        #endregion
+        #endregion
+
+        #region Method
+
+        private ActionResult<IEnumerable<CommandGetDTO>> GetCommands(int num)
+        {
+            var controller = ArrangeController(repo => repo.GetCommands(), () => GetListOfCommand(num));
             return controller.GetCommands();
 
-            #region Local Function
             static List<Command> GetListOfCommand(int num)
             {
                 var commands = new List<Command>();
@@ -96,7 +223,13 @@ namespace CommandAPITests
 
                 return commands;
             }
-            #endregion
         }
+
+        private CommandsController ArrangeController<T, Y>(Expression<Func<ICommandAPIRepo, T>> expression, Func<Y> val)
+        {
+            mockRepo.Setup(expression).Returns(val);
+            return new CommandsController(mockRepo.Object, mapper);
+        }
+        #endregion
     }
 }
