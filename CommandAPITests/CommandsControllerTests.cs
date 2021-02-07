@@ -41,15 +41,15 @@ namespace CommandAPITests
         [Fact]
         public void GetCommands_Returns200OK_WhenDBIsEmpty()
         {
-            var result = GetCommands(0);
-            Assert.IsType<OkObjectResult>(result.Result);
+            var result = GetCommands(0).Result;
+            Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
         public void GetCommands_Returns200OK_WhenDBHasOneResource()
         {
-            var result = GetCommands(1);
-            Assert.IsType<OkObjectResult>(result.Result);
+            var result = GetCommands(1).Result;
+            Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
@@ -74,28 +74,16 @@ namespace CommandAPITests
         [Fact]
         public void GetCommand_Returns200OK__WhenValidIDProvided()
         {
-            var controller = ArrangeController(repo => repo.GetCommand(1), () => new Command
-            {
-                Id = 1,
-                Usability = "mock",
-                PlatformId = 1,
-                CommandLine = "Mock"
-            });
-            var result = controller.GetCommand(1);
+            var controller = ArrangeCommand(1);
+            var result = controller.GetCommand(1).Result;
 
-            Assert.IsType<OkObjectResult>(result.Result);
+            Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
         public void GetCommand_ReturnsCorrectType__WhenValidIDProvided()
         {
-            var controller = ArrangeController(repo => repo.GetCommand(1), () => new Command
-            {
-                Id = 1,
-                Usability = "mock",
-                PlatformId = 1,
-                CommandLine = "Mock"
-            });
+            var controller = ArrangeCommand(1);
             var result = controller.GetCommand(1);
 
             Assert.IsType<ActionResult<CommandGetDTO>>(result);
@@ -104,10 +92,10 @@ namespace CommandAPITests
         [Fact]
         public void GetCommand_Returns404NotFound_WhenNonExistentIDProvided()
         {
-            var controller = ArrangeController<Command, Command>(repo => repo.GetCommand(0), () => null);
-            var result = controller.GetCommand(1);
+            var controller = ArrangeCommand(0, false);
+            var result = controller.GetCommand(1).Result;
 
-            Assert.IsType<NotFoundResult>(result.Result);
+            Assert.IsType<NotFoundResult>(result);
         }
         #endregion
 
@@ -115,13 +103,7 @@ namespace CommandAPITests
         [Fact]
         public void CreateCommand_ReturnsCorrectResourceType_WhenValidObjectSubmitted()
         {
-            var controller = ArrangeController(repo => repo.GetCommand(1), () => new Command
-            {
-                Id = 1,
-                Usability = "mock",
-                PlatformId = 1,
-                CommandLine = "Mock"
-            });
+            var controller = ArrangeCommand(1);
             var result = controller.CreateCommand(new());
 
             Assert.IsType<ActionResult<CommandGetDTO>>(result);
@@ -129,16 +111,10 @@ namespace CommandAPITests
         [Fact]
         public void CreateCommand_Returns201Created_WhenValidObjectSubmitted()
         {
-            var controller = ArrangeController(repo => repo.GetCommand(1), () => new Command
-            {
-                Id = 1,
-                Usability = "mock",
-                PlatformId = 1,
-                CommandLine = "Mock"
-            });
-            var result = controller.CreateCommand(new());
+            var controller = ArrangeCommand(1);
+            var result = controller.CreateCommand(new()).Result;
 
-            Assert.IsType<CreatedAtRouteResult>(result.Result);
+            Assert.IsType<CreatedAtRouteResult>(result);
         }
         #endregion
 
@@ -146,13 +122,7 @@ namespace CommandAPITests
         [Fact]
         public void UpdateCommand_Returns204NoContent_WhenValidObjectSubmitted()
         {
-            var controller = ArrangeController(repo => repo.GetCommand(1), () => new Command
-            {
-                Id = 1,
-                Usability = "mock",
-                PlatformId = 1,
-                CommandLine = "Mock"
-            });
+            var controller = ArrangeCommand(1);
             var result = controller.UpdateCommand(1, new());
 
             Assert.IsType<NoContentResult>(result);
@@ -161,7 +131,7 @@ namespace CommandAPITests
         [Fact]
         public void UpdateCommand_Returns404NotFound_WhenNonExistentResourceIDSubmitted()
         {
-            var controller = ArrangeController<Command, Command>(repo => repo.GetCommand(0), () => null);
+            var controller = ArrangeCommand(0, false);
             var result = controller.UpdateCommand(0, new());
 
             Assert.IsType<NotFoundResult>(result);
@@ -172,7 +142,7 @@ namespace CommandAPITests
         [Fact]
         public void PartialCommandUpdate_Returns404NotFound_WhenNonExistentResourceIDSubmitted()
         {
-            var controller = ArrangeController<Command, Command>(repo => repo.GetCommand(0), () => null);
+            var controller = ArrangeCommand(0, false);
             var result = controller.PartialCommandUpdate(0, new());
 
             Assert.IsType<NotFoundResult>(result);
@@ -183,13 +153,7 @@ namespace CommandAPITests
         [Fact]
         public void DeleteCommand_Returns204NoContent_WhenValidResourceIDSubmitted()
         {
-            var controller = ArrangeController(repo => repo.GetCommand(1), () => new Command
-            {
-                Id = 1,
-                Usability = "mock",
-                PlatformId = 1,
-                CommandLine = "Mock"
-            });
+            var controller = ArrangeCommand(1);
             var result = controller.DeleteCommand(1);
 
             Assert.IsType<NoContentResult>(result);
@@ -198,7 +162,7 @@ namespace CommandAPITests
         [Fact]
         public void DeleteCommand_Returns_404NotFound_WhenNonExistentResourceIDSubmitted()
         {
-            var controller = ArrangeController<Command, Command>(repo => repo.GetCommand(1), () => null);
+            var controller = ArrangeCommand(1, false);
             var result = controller.DeleteCommand(0);
 
             Assert.IsType<NotFoundResult>(result);
@@ -207,6 +171,18 @@ namespace CommandAPITests
         #endregion
 
         #region Method
+        private CommandsController ArrangeCommand(int id, bool mockInstance=true)
+        {
+            var cmd = mockInstance ? new Command
+            {
+                Id = 1,
+                Usability = "mock",
+                PlatformId = 1,
+                CommandLine = "Mock"
+            } : null;
+
+            return ArrangeController(repo => repo.GetCommand(id), () => cmd);
+        }
 
         private ActionResult<IEnumerable<CommandGetDTO>> GetCommands(int num)
         {
