@@ -15,10 +15,10 @@ namespace CommandAPITests
 {
     public class CommandsControllerTests : IDisposable
     {
-        Mock<ICommandAPIRepo> mockRepo;
-        CommandsProfile realProfile;
-        MapperConfiguration config;
-        IMapper mapper;
+        private Mock<ICommandAPIRepo> mockRepo;
+        private CommandsProfile realProfile;
+        private MapperConfiguration config;
+        private IMapper mapper;
 
         public CommandsControllerTests()
         {
