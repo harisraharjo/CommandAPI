@@ -44,7 +44,7 @@ namespace CommandAPI
                 opt.SerializerSettings.ContractResolver = new
                 CamelCasePropertyNamesContractResolver();
             });
-            //WHAT IS THIS?!
+            //WHAT IS THIS GETASSMBLIES?!
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddScoped<ICommandAPIRepo, SqlCommandAPIRepo>();
