@@ -11,6 +11,7 @@ resources:
 variables:
   imageName: 'CommandAPI'
   tag: '$(Build.BuildId)'
+  buildConfiguration: 'Release'
 
 stages:
 - stage: Build
@@ -35,3 +36,12 @@ stages:
         command: test
         projects: '**/*Tests/*.csproj'
         testRunTitle: 'xUnit Test Run'
+    - task: DotNetCoreCLI@2
+      displayName: 'dotnet publish'
+      inputs:
+        command: publish
+        publishWebProjects: false
+        projects: '/CommandAPI/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    - task: PublishBuildArtifacts@1
+      displayName: 'publish artifacts'  
