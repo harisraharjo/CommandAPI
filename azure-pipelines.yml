@@ -29,3 +29,9 @@ stages:
         dockerfile: '$(Build.SourcesDirectory)/CommandAPI/Dockerfile'
         tags: |
           $(tag)
+    - task: DotNetCoreCLI@2
+      displayName: 'dotnet test'
+      inputs:
+        command: test
+        projects: '**/*Tests/*.csproj'
+        testRunTitle: 'xUnit Test Run'
