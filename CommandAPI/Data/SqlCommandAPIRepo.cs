@@ -40,7 +40,7 @@ namespace CommandAPI.Data
 
         public bool SaveChanges()
         {
-            return (_context.SaveChanges() >= 0);
+            return _context.SaveChanges() >= 0;
         }
 
         public void Update(Command cmd)

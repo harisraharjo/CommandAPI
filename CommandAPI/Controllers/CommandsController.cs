@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.JsonPatch;
 namespace CommandAPI.Controllers
 {
     [Route("api/[controller]")]
+    [ApiConventionType(typeof(DefaultApiConventions))]
     [ApiController]
     public class CommandsController : ControllerBase
     {
@@ -23,7 +24,6 @@ namespace CommandAPI.Controllers
             _repository = repository;
             _mapper = mapper;
         }
-
 
         [HttpGet("{id}", Name = "GetCommand")]
         public ActionResult<CommandGetDTO> GetCommand(int id)
@@ -95,6 +95,5 @@ namespace CommandAPI.Controllers
             _repository.SaveChanges();
             return NoContent();
         }
-
     }
 }

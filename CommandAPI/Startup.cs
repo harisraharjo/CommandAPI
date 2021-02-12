@@ -31,10 +31,9 @@ namespace CommandAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-            var builder = new NpgsqlConnectionStringBuilder() { 
+            var builder = new NpgsqlConnectionStringBuilder() {
                 ConnectionString = Configuration.GetConnectionString("PostgreSqlConnection"),
-                Username = Configuration["UserID"], 
+                Username = Configuration["UserID"],
                 Password = Configuration["Password"] };
 
             services.AddDbContext<CommandContext>(opt => opt.UseNpgsql(builder.ConnectionString));
@@ -44,14 +43,11 @@ namespace CommandAPI
                 opt.SerializerSettings.ContractResolver = new
                 CamelCasePropertyNamesContractResolver();
             });
-            //WHAT IS THIS GETASSMBLIES?!
+
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             services.AddScoped<ICommandAPIRepo, SqlCommandAPIRepo>();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "CommandAPI", Version = "v1" });
-            });
+            services.AddSwaggerGen(c => c.SwaggerDoc("v1", new OpenApiInfo { Title = "CommandAPI", Version = "v1" }));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -70,10 +66,7 @@ namespace CommandAPI
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => endpoints.MapControllers());
         }
     }
 }

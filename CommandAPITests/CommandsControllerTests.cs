@@ -34,6 +34,9 @@ namespace CommandAPITests
             realProfile = null;
             config = null;
             mapper = null;
+
+            //Dispose();
+            //GC.SuppressFinalize(this);
         }
 
         #region Tests
