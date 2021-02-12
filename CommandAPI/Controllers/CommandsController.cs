@@ -19,11 +19,8 @@ namespace CommandAPI.Controllers
         private readonly ICommandAPIRepo _repository;
         private readonly IMapper _mapper;
 
-        public CommandsController(ICommandAPIRepo repository, IMapper mapper)
-        {
-            _repository = repository;
-            _mapper = mapper;
-        }
+        public CommandsController(ICommandAPIRepo repository, IMapper mapper) => 
+            (_repository, _mapper) = (repository, mapper);
 
         [HttpGet("{id}", Name = "GetCommand")]
         public ActionResult<CommandGetDTO> GetCommand(int id)
